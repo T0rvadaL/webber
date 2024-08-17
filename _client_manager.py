@@ -13,6 +13,14 @@ from ._exceptions import InternalError
 
 
 class ClientManager:
+    """
+    A client manager that manages a pool of clients. The manager will automatically create, manage and rotate clients
+    when making requests. The manager will also adjust how many requests a client can make based if rate-limiting occurs.
+
+    :param proxies: Either an iterable collection of Proxy objects, or a mapping where keys are Proxy objects
+                        and values are booleans indicating whether the proxy failed on its last use.
+    """
+
     _MIN_CLIENT_REQUESTS = 4
 
     def __init__(self, proxies: typing.Iterable[Proxy] | typing.Mapping[Proxy, bool]):

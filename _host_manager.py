@@ -1,10 +1,6 @@
 import asyncio
-import json
-import os
 import time
 import typing
-import atexit
-import signal
 import httpx
 
 from collections import deque
@@ -14,7 +10,15 @@ from ._proxy import Proxy
 
 
 class HostManager:
-    def __init__(self, host: str, proxies: typing.Collection[Proxy] | typing.Mapping[Proxy: bool]):
+    """
+    A Class that manages requests to a single host.
+    The manager will automatically adjust request delays based on response times.
+
+    :param host: The host to manage requests for.
+    :param proxies: Either an iterable collection of Proxy objects, or a mapping where keys are Proxy objects
+                    and values are booleans indicating whether the proxy failed on its last use.
+    """
+    def __init__(self, host: str, proxies: typing.Collection[Proxy] | typing.Mapping[Proxy, bool]):
         self._client_manager = ClientManager(proxies)
         self.host = host
         self._last_requested = 0

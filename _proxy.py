@@ -1,11 +1,17 @@
 import validators
 
 from dataclasses import dataclass
-from collections import deque
 
 
 @dataclass(frozen=True, eq=False)
 class Proxy:
+    """
+    A class for representing a proxy.
+
+    :param url: The url of the proxy.
+    :param user_agent: a dictionary of user-agent related headers.
+    """
+
     url: str
     user_agent: dict[str, str]
 
@@ -20,3 +26,6 @@ class Proxy:
 
     def __hash__(self):
         return hash(self.url)
+
+    def __str__(self):
+        return f"Proxy(url={self.url}, user_agent={self.user_agent})"
