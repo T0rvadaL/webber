@@ -1,2 +1,3 @@
 ## Acknowledgments
-Webber uses source code from [`httpx`](https://www.python-httpx.org/), an HTTP client for Python. `httpx` is licensed under the BSD 3-Clause License.
+Webber uses [`httpx`](https://www.python-httpx.org/), which is licensed under the BSD 3-Clause License.
+Webber uses [`validators`](https://pypi.org/project/validators/), which is licensed under the MIT License.
