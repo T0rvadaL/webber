@@ -1,0 +1,4 @@
+pytest
+brotlipy
+httpx[http2]
+validators
