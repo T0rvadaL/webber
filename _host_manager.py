@@ -2,6 +2,7 @@ import asyncio
 import time
 import typing
 import httpx
+import validators
 
 from collections import deque
 
@@ -19,6 +20,8 @@ class HostManager:
                     and values are booleans indicating whether the proxy failed on its last use.
     """
     def __init__(self, host: str, proxies: typing.Collection[Proxy] | typing.Mapping[Proxy, bool]):
+        if not (validators.domain(host) or validators.ipv4(host)):
+            raise ValueError(f"host: {host} is not a valid host.")
         self._client_manager = ClientManager(proxies)
         self.host = host
         self._last_requested = 0

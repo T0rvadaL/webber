@@ -8,6 +8,8 @@ from .._proxy import Proxy
 @pytest.mark.parametrize(
     "url",
     [
+        "https://example.com.."
+        "https://example..com"
         "https://examplecom",
         "https:/example.com",
         "https:example.com",
@@ -44,14 +46,14 @@ def test_urls_are_valid(url, user_agent1):
     assert proxy.user_agent == user_agent1
 
 
-def test_equality_and_hash(proxy1, proxy2, proxy3):
-    proxy4 = Proxy(proxy2.url, proxy2.user_agent.copy())
-    assert proxy1 == proxy2 == proxy4
-    assert hash(proxy1) == hash(proxy2) == hash(proxy4)
-    assert proxy1 != proxy3
-    assert hash(proxy1) != hash(proxy3)
+def test_equality(proxy_u1a1, proxy_u1a2, proxy_u2a1):
+    assert proxy_u1a1 == proxy_u1a2 != proxy_u2a1
 
 
-def test_immutability(proxy1):
+def test_hash(proxy_u1a1, proxy_u1a2, proxy_u2a1):
+    assert hash(proxy_u1a1) == hash(proxy_u1a2) != hash(proxy_u2a1)
+
+
+def test_immutability(proxy_u1a1):
     with pytest.raises(FrozenInstanceError):
-        proxy1.url = "foo"
+        proxy_u1a1.url = "foo"

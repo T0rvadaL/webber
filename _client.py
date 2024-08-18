@@ -30,9 +30,19 @@ class Client(AsyncClient):
             event_hooks=event_hooks,
         )
 
+        self._http2 = http2
+        self._proxy = proxy
         self._pending_requests = 0
         self._last_requested = 0
         self._proxy = proxy
+
+    @property
+    def http2(self) -> bool:
+        return self._http2
+
+    @property
+    def proxy(self) -> Proxy | None:
+        return self._proxy
 
     @property
     def pending_requests(self) -> int:
@@ -41,10 +51,6 @@ class Client(AsyncClient):
     @property
     def last_requested(self) -> int:
         return self._last_requested
-
-    @property
-    def proxy(self) -> Proxy | None:
-        return self._proxy
 
     def build_request(
             self,
@@ -86,13 +92,14 @@ class Client(AsyncClient):
                 else Timeout(timeout)
             )
             extensions = dict(**extensions, timeout=timeout.as_dict())
+
         if event_hooks is not None:
             _event_hooks = {
                 "request": list(event_hooks.get("request", [])),
                 "response": list(event_hooks.get("response", [])),
             }
         else:
-            _event_hooks = self._event_hooks
+            _event_hooks = {"request": [], "response": []}
 
         return Request(
             method,
@@ -181,23 +188,20 @@ class Client(AsyncClient):
             extensions: RequestExtensions | None = None,
             event_hooks: (typing.Mapping[str, list[EventHook]]) | None = None
     ) -> Response:
-        try:
-            return await self.request(
-                "GET",
-                url,
-                params=params,
-                headers=headers,
-                cookies=cookies,
-                auth=auth,
-                follow_redirects=follow_redirects,
-                timeout=timeout,
-                extensions=extensions,
-                event_hooks=event_hooks
-            )
-        finally:
-            self._pending_requests -= 1
-            if self._pending_requests < 0:
-                raise RuntimeError("INTERNAL ERROR. Client has negative number of pending requests.")
+        return await self.request(
+            "GET",
+            url,
+            params=params,
+            headers=headers,
+            cookies=cookies,
+            auth=auth,
+            follow_redirects=follow_redirects,
+            timeout=timeout,
+            extensions=extensions,
+            event_hooks=event_hooks
+        )
+
+
 
     async def _send_handling_redirects(
             self,
@@ -217,8 +221,11 @@ class Client(AsyncClient):
             self._last_requested = time.time()  # Added
             self._pending_requests += 1     # Added
 
-            response = await self._send_single_request(request)
-
+            try:
+                response = await self._send_single_request(request)
+            finally:
+                self._pending_requests -= 1
+                assert self._pending_requests >= 0
             try:
                 for hook in request.event_hooks["response"]:  # Changed
                     await hook(response)

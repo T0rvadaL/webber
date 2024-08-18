@@ -15,3 +15,8 @@ class ProxiesUnavailable(Exception):
 
 class ProxiesExhausted(Exception):
     """Raise this exception when all proxies have been exhausted"""
+
+
+class AdjustmentError(Exception):
+    """Raise this exception when an adjustment results in an invalid state"""
+
