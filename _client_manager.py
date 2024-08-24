@@ -1,4 +1,4 @@
-import asyncio
+import trio
 import atexit
 import random
 import signal
@@ -148,7 +148,7 @@ class ClientManager:
             self._proxy_pool.free(client)
 
     def _run_cleanup(self):
-        asyncio.run(self._cleanup())
+        trio.run(self._cleanup)
 
     def _on_sigint(self, sig, frame):
         self._run_cleanup()
