@@ -2,7 +2,7 @@ import pytest
 
 from dataclasses import FrozenInstanceError
 
-from .._proxy import Proxy
+from webber._proxy import Proxy
 
 
 @pytest.mark.parametrize(

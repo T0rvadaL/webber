@@ -1,9 +1,9 @@
 import httpx
 import pytest
 
-from .._proxy import Proxy
-from .._proxy_pool import ProxyPool
-from .._client_manager import ClientManager
+from webber._proxy import Proxy
+from webber._proxy_pool import ProxyPool
+from webber._client_manager import ClientManager
 
 
 @pytest.fixture

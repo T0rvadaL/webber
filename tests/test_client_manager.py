@@ -5,8 +5,8 @@ import respx
 from httpx import HTTPStatusError
 
 from .test_utils import raise_for_status_hook
-from .._client_manager import ClientManager
-from .._exceptions import AdjustmentError
+from webber._client_manager import ClientManager
+from webber._exceptions import AdjustmentError
 
 
 @pytest.mark.parametrize("min_client_requests, max_client_requests", [(1, 1), (1, 2), (10, 1000)])

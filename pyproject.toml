@@ -1,0 +1,31 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "webber"
+version = "0.1.0"
+description = "A high level asynchronous web scraping library"
+authors = [
+    { name = "Gutti Torvadal", email = "gutti.torvadal@gmail.com" }
+]
+license = { file = "LICENSE" }
+readme = "README.md"
+requires-python = ">=3.8"
+
+dependencies = [
+    "pytest",
+    "pytest-trio",
+    "brotlipy",
+    "httpx[http2]",
+    "validators",
+    "ua_generator",
+    "respx",
+    "trio",
+]
+
+[tool.hatch.build.targets.sdist]
+include = ["webber"]
+
+[tool.hatch.build.targets.wheel]
+include = ["webber"]

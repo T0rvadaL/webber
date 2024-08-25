@@ -5,8 +5,8 @@ from collections import deque
 
 import respx
 
-from .._proxy_pool import ProxyPool
-from .._exceptions import ProxiesUnavailable, ProxiesExhausted
+from webber._proxy_pool import ProxyPool
+from webber._exceptions import ProxiesUnavailable, ProxiesExhausted
 
 
 def test_valid_initialization(proxy_pool_3):
