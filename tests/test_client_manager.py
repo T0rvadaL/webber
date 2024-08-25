@@ -1,4 +1,4 @@
-import asyncio
+import trio
 import httpx
 import pytest
 import respx
@@ -6,7 +6,6 @@ from httpx import HTTPStatusError
 
 from .test_utils import raise_for_status_hook
 from .._client_manager import ClientManager
-from .._proxy import Proxy
 from .._exceptions import AdjustmentError
 
 
@@ -50,39 +49,39 @@ def test_invalid_max_client_requests_setter(value, client_manager_2_3):
 
 
 @respx.mock
-@pytest.mark.asyncio
+@pytest.mark.trio
 async def test_creates_new_clients_when_on_timeout(proxies_3, url):
     respx.get().respond(200)
     client_manager = ClientManager(proxies_3, 10, 10)
-    async with asyncio.TaskGroup() as group:
+    async with trio.open_nursery() as nursery:
         for _ in range(3):
-            group.create_task(client_manager.request(url, {}))
+            nursery.start_soon(client_manager.request, url, {})
     assert len(client_manager._clients) == 3
 
 
 @respx.mock
-@pytest.mark.asyncio
+@pytest.mark.trio
 async def test_reuses_clients_if_not_on_timeout(proxies_3, url):
     respx.get().respond(200)
     client_manager = ClientManager(proxies_3, 10, 10)
     await client_manager.request(url, {})
-    await asyncio.sleep(ClientManager._calc_wait_time(next(iter(client_manager._clients))) + 0.1)
+    await trio.sleep(ClientManager._calc_wait_time(next(iter(client_manager._clients))) + 0.1)
     await client_manager.request(url, {})
     assert len(client_manager._clients) == 1
 
 
 @respx.mock
-@pytest.mark.asyncio
+@pytest.mark.trio
 async def test_creates_new_clients_if_different_http_version(proxies_3, url):
     respx.get().respond(200)
     client_manager = ClientManager(proxies_3, 10, 10)
     await client_manager.request(url, {})
-    await asyncio.sleep(ClientManager._calc_wait_time(next(iter(client_manager._clients))) + 0.1)
+    await trio.sleep(ClientManager._calc_wait_time(next(iter(client_manager._clients))) + 0.1)
     await client_manager.request(url, {}, http2=False)
     assert len(client_manager._clients) == 2
 
 
-@pytest.mark.asyncio
+@pytest.mark.trio
 @respx.mock
 @pytest.mark.parametrize("event_hooks", [None, {"response": [raise_for_status_hook]}])
 async def test_400x_500x_closes_client(proxies_1000, codes_400x_500x, url, event_hooks):
@@ -98,7 +97,7 @@ async def test_400x_500x_closes_client(proxies_1000, codes_400x_500x, url, event
 
 
 @respx.mock
-@pytest.mark.asyncio
+@pytest.mark.trio
 @pytest.mark.parametrize("event_hooks", [None, {"response": [raise_for_status_hook]}])
 async def test_429_reduces_max_client_requests_and_closes_clients(url, proxies_3, event_hooks):
     respx.get().respond(200)
@@ -109,7 +108,7 @@ async def test_429_reduces_max_client_requests_and_closes_clients(url, proxies_3
         await client_manager.request(url, {}, event_hooks=event_hooks)
     except HTTPStatusError:
         pass
-    await asyncio.sleep(ClientManager._calc_wait_time(next(iter(client_manager._clients))) + 0.1)
+    await trio.sleep(ClientManager._calc_wait_time(next(iter(client_manager._clients))) + 0.1)
 
     # Reuse the first client and create 2 more
     for _ in range(3):
@@ -129,7 +128,7 @@ async def test_429_reduces_max_client_requests_and_closes_clients(url, proxies_3
     client_manager.min_client_requests = 2
 
     # Wait so me don't create a new client
-    await asyncio.sleep(ClientManager._calc_wait_time(next(iter(client_manager._clients))) + 0.1)
+    await trio.sleep(ClientManager._calc_wait_time(next(iter(client_manager._clients))) + 0.1)
 
     # The first client we created has made two clients, the next one will be unsuccessful, so max_client_requests,
     # should be reduced to 2 after the request has been made
@@ -145,7 +144,7 @@ async def test_429_reduces_max_client_requests_and_closes_clients(url, proxies_3
 
 
 @respx.mock
-@pytest.mark.asyncio
+@pytest.mark.trio
 @pytest.mark.parametrize("event_hooks", [None, {"response": [raise_for_status_hook]}])
 async def test_429_handling_raises_adjustment_error_if_max_client_requests_falls_below_min_client_requests(url, proxies_3, event_hooks):
     respx.get().respond(429)

@@ -4,7 +4,6 @@ import pytest
 from .._proxy import Proxy
 from .._proxy_pool import ProxyPool
 from .._client_manager import ClientManager
-from .._host_manager import HostManager
 
 
 @pytest.fixture
