@@ -64,7 +64,7 @@ class Webber:
 
     @staticmethod
     def assign_user_agents_to_proxies(proxies: typing.Collection[str], output_path) -> dict[Proxy, str]:
-        ua_proxies = (Proxy(proxy, Webber._generate_user_agent()) for proxy in proxies)
+        ua_proxies = [Proxy(proxy, Webber._generate_user_agent()) for proxy in proxies]
 
         with open(output_path, "wb") as f:
             pickle.dump(ua_proxies, f)
