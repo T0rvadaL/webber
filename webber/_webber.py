@@ -45,12 +45,12 @@ class Webber:
         else:
             _event_hooks = {"request": [], "response": []}
 
-        event_hooks["request"].append(self._on_request)
-        event_hooks["response"].append(self._on_response)
+        _event_hooks["request"].append(self._on_request)
+        _event_hooks["response"].append(self._on_response)
 
         while True:
             try:
-                response = await host.request(url, headers, event_hooks, http2)
+                response = await host.request(url, headers, _event_hooks, http2)
                 response.raise_for_status()
                 return response
 
